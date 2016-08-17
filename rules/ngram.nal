@@ -1,0 +1,27 @@
+' NLP RULE
+' Given any sentence sx = (*, w1, w2, w3, ...), each wn --> TOKEN and <(*,wn,sx) --> INSIDE>
+' Concepts: TOKEN, SENTENCE, NGRAM, INSIDE, INDEPENDENT, POS, DEPENDENCY
+
+' Define NGRAM
+' SENTENCE's and TOKEN's both are NGRAM's
+<(&&, SENTENCE, TOKEN) --> NGRAM>.
+
+' NGRAM's are also couples of NGRAM's
+<(*, #1(NGRAM), #2(NGRAM)) --> NGRAM>.
+
+' Define INSIDE
+' A is inside B if B is an NGRAM containing A
+<(*, #A(NGRAM), (*, #C(NGRAM), #A)) --> INSIDE>.
+<(*, #A(NGRAM), (*, #A, #C(NGRAM))) --> INSIDE>.
+' If A is inside B and B is inside C then A is inside C
+<(&&, <(*, #A, #B) --> INSIDE>, <(*, #B, #C) --> INSIDE>) <=> <(*, #A, #C) --> INSIDE>>.
+
+' Define POS
+' TOKENS in a sentence have a part of speech property
+<<(*,#1(NGRAM),#2(SENTENCE))-->INSIDE)> --] #2(POS)>.
+
+' Two ngrams that have a dependency are both members of a common NGRAM and are independent
+<<(*, #1(NGRAM), #2(NGRAM)) --] DEPENDENCY> <=> (&&, <(*,#1,#3(NGRAM))-->INSIDE>, <(*,#2,#3)-->INSIDE>, <(*,#1,#2)-->INDEPENDENT)>>
+
+' INDEPENDENT NGRAMS are not inside each other
+<<(*, #1(NGRAM), #2(NGRAM)) --> INDEPENDENT> <=> (&&, --<(*,#1,#2) --> INSIDE>, --<(*,#2,#1) --> INSIDE>)>.
