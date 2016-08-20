@@ -88,3 +88,6 @@ def all_inherit_type(X, rel, y):
         out.append(statement(x,rel,y))
     return out
     
+def f_requires(f_op, in_number, req):
+    """<(*,<(*,$f_op, $input) --> REQUIRES>, $req) --> WHERE>"""
+    return '<(*,<(*,{},$i{}) --> REQUIRES>, {}) --> WHERE>'.format(f_op, in_number, req)

@@ -1,0 +1,12 @@
+' Define INSIDE
+' A is inside B if B is a product containing A
+<(<($B, (||,($A, $1),($1, $A),($1,$A,$2))) --> SAME_AS>,<($A,$B) --> INSIDE>) --> IMPLIES>.
+
+' Axiomatic Relationships
+<<(*,$1,$2) --> PROPERTY_OF> ==> <$1 --] $2>>.
+<<(*,$1,$2) --> INHERITS> ==> <$1 --> $2>>.
+<<(*,$1,$2) --> IS_A> ==> <$1 {-- $2>>.
+<<(*,$1,$2) --> SAME_AS> ==> <$1 <-> $2>>.
+<<(*,$1,$2) --> DEFINE> ==> <$1 <=> $2>>.
+<<(*,$1,$2) --> IMPLIES> ==> <$1 ==> $2>>.
+<<(*,$1,$2) --> WHERE> ==> (&&,$1,<$1 ==> $2>)>.
