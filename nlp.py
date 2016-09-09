@@ -42,7 +42,12 @@ def sentence_to_narsese(sentence, authority = UNKNOWN):
     out += author_is_authority
     
     # Tokens are said in time by authority
-    token_said =     ['<({},{}) --> {}>'.format(authority, t, SAYS) for t in token_names]
+    if authority == None:
+        token_said = ['<({},{}) --> {}>'.format('#1', t, SAYS) for t in token_names]
+        token_said.append('<#1 --> {}>'.format('#1', AUTHOR))
+        token_said = [narsese.compound(token_said, '&&') + '.']
+    else:
+        token_said = ['<({},{}) --> {}>'.format(authority, t, SAYS) for t in token_names]
     token_said_now = ['{}. :|:'.format(t) for t in token_said_by]
     out += token_said_now
     
