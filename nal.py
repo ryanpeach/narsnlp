@@ -1,8 +1,6 @@
 from nltk import *
 from itertools import combinations
 
-# Description: (relation, concept)
-
 # Primitive classes
 class Term():
     def __init__(self, x):

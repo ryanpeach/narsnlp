@@ -1,38 +1,65 @@
-import nltk
-from nltk.parse.stanford import StanfordDependencyParser
-path_to_jar = '../stanford-parser-full-2015-12-09/stanford-parser.jar'
-path_to_models_jar = '../stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar'
-    
-def dependency(x = 'I shot an elephant in my sleep.'):
-    """http://stackoverflow.com/questions/7443330/how-do-i-do-dependency-parsing-in-nltk"""
-    dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
-    result = dependency_parser.raw_parse(x)
-    dep = result.next()
-    return list(dep.triples())
+from tools.parsing import *
+import narsese
 
-def tokenize(x):
-    return nltk.word_tokenize(x)
-    
-def tokenize_sentences(x):
-    return nltk.sent_tokenize(x)
-    
-def tag_pos(x):
-    return nltk.pos_tag(x)
-    
-def quote(x):
-    return "\"{}\"".format(str(x))
+TNAME       = '{{t_\"{}\"}}'
+SNAME       = '{{s_\"{}\"}}'
+CNAME       = 'c_\"{}\"'
+TOKEN       = 'nlp_Token'
+SAYS        = 'nlp_Says'
+SENTENCE    = 'nlp_Sentence'
+RELATES     = 'nlp_Relates'
+CONCEPT     = 'nlp_Concept'
+AUTHOR      = 'nlp_Author'
+IN_SENTENCE = 'nlp_In_Sentence'
+UNKNOWN     = '{nlp_UnknownAuthority}'
 
-def is_token(x):
-    return str(tokenize(x)[0]) == x
-
-def is_sentence(x):
-    return str(tokenize_sentences(x)[0]) == x
+def sentence_to_narsese(sentence, authority = UNKNOWN):
+    """ Returns a list of all rules applying to this sentence. """
+    # Initialize output
+    out = []
     
-def is_url(x):
-    pass
+    # Tokenize
+    tokens = tokenize(sentence)
+    
+    # Tokens have names 
+    token_names = [TNAME.format(t) for t in tokens]
+    
+    # Tokens relate concepts
+    concept_names = [CNAME.format(t) for t in tokens]
+    relationships = ['<({},{}) --> {}>.'.format(t,c,RELATES) for t, c in zip(token_names, concept_names)]
+    out += relationships
+    
+    # Tokens are tokens
+    tokens_are_tokens = ['<{} --> {}>.'.format(t, TOKEN) for t in token_names]
+    out += tokens_are_tokens
+    
+    # Concepts are concepts
+    concepts_are_concepts = ['<{} --> {}>.'.format(c, CONCEPT) for c in concept_names]
+    out += concepts_are_concepts
 
-if __name__=="__main__":
-    x = input("Input sentence: ")
-    print(tokenize(x))
-    print(tag_pos(tokenize(x)))
-    print(dependency(x))
+    # Authority is an authority
+    author_is_authority = '<{} --> {}>.'.format(authority, AUTHOR)
+    out += author_is_authority
+    
+    # Tokens are said in time by authority
+    token_said =     ['<({},{}) --> {}>'.format(authority, t, SAYS) for t in token_names]
+    token_said_now = ['{}. :|:'.format(t) for t in token_said_by]
+    out += token_said_now
+    
+    # Sentences have names
+    sentence_name = SNAME.format(sentence)
+    
+    # Sentences are Sentences
+    sent_are_sent = '<{} --> {}>.'.format(sentence_name, SENTENCE)
+    out.append(sent_are_sent)
+    
+    # Sentence names are equivalent to sequences of tokens said
+    said_sequence       = narsese.compound(token_said, '&/')
+    seq_equals_sentence = '<{} <-> {}>.'.format(said_sequence, sentence_name)
+    out.append(seq_equals_sentence)
+    
+    # Tokens are in this sentence
+    tokens_in_sentence = ['<({},{}) --> {}>.'.format(t,sentence_name,IN_SENTENCE) for t in token_names]
+    out += tokens_in_sentence
+
+    return sentence_name, out
